@@ -15,8 +15,8 @@ public class Vendas extends javax.swing.JPanel {
     ResultSet rs = null;
     Statement st = null;
     PreparedStatement ps = null;
-    String receita, estoque, idvenda, nome, query, codigo, buscaBD = null;
-    int notfound = 0, id = 0, qtd = 0;
+    String receita, estoque, idvenda, nome, query, codigo, nomebd, buscaBD = null;
+    int notfound = 0, id = 0, qtd = 0, idprodbd = 0, qtdbd = 0;
     float preco = 0;
 
     public Vendas() {
@@ -494,28 +494,42 @@ public class Vendas extends javax.swing.JPanel {
                 preco = Float.parseFloat(PrecoProd.getText());
                 qtd = Integer.parseInt(QtdProd.getText());
 
-                //CONSULTA NO BANCO
-                int pst1 = ComprasVendas.buscarcompras(id);
-                //INSERIR NO BANCO
-                if (pst1 == 1) {
-                    query = "UPDATE produtos SET quantidade = quantidade -'" + qtd + "' WHERE id =" + id;
-                    st.executeUpdate(query);
-                    float receita = preco * qtd;
-                    query = "INSERT INTO vendas (idprod, quantidade, preco, receita)" + "VALUES('" + id + "', '" + qtd + "', '" + preco + "', '" + receita + "')";
-                    st.executeUpdate(query);
-                    IdProd.setText("");
-                    PrecoProd.setText("");
-                    QtdProd.setText("");
-                    showMessageDialog(null, "Produto vendido com sucesso!");
-                    AvisoID.setText("");
-                    AvisoNome.setText("");
-                    AvisoQtd.setText("");
+                //CONSULTA NO BANCO]
+                PreparedStatement pst = con.prepareStatement("SELECT * FROM produtos WHERE id ='" + id + "'");
+                ResultSet rs = pst.executeQuery();
+                while (rs.next()) {
+                    nomebd = rs.getString("nome");
+                    idprodbd = rs.getInt("id");
+                    qtdbd = rs.getInt("quantidade");
+                    notfound = 1;
+
+                }
+                if (qtdbd <= 0) {
+                    JOptionPane.showMessageDialog(new JFrame(), "NÃO É POSSÍVEL VENDER ESTA QUANTIDADE!", "Erro ao vender!", JOptionPane.ERROR_MESSAGE);
                 } else {
 
-                    //VALIDAÇÃO DE DADOS
-                    JOptionPane.showMessageDialog(new JFrame(), "O ID DIGITADO NÃO EXISTE!", "Erro ao comprar!", JOptionPane.ERROR_MESSAGE);
-                    AvisoID.setText("Insira um id válido!");
-                    IdProd.setText("");
+                    int pst1 = ComprasVendas.buscarcompras(id);
+                    //INSERIR NO BANCO
+                    if (pst1 == 1) {
+                        query = "UPDATE produtos SET quantidade = quantidade -'" + qtd + "' WHERE id =" + id;
+                        st.executeUpdate(query);
+                        float receita = preco * qtd;
+                        query = "INSERT INTO vendas (idprod, quantidade, preco, receita)" + "VALUES('" + id + "', '" + qtd + "', '" + preco + "', '" + receita + "')";
+                        st.executeUpdate(query);
+                        IdProd.setText("");
+                        PrecoProd.setText("");
+                        QtdProd.setText("");
+                        showMessageDialog(null, "Produto vendido com sucesso!");
+                        AvisoID.setText("");
+                        AvisoNome.setText("");
+                        AvisoQtd.setText("");
+                    } else {
+
+                        //VALIDAÇÃO DE DADOS
+                        JOptionPane.showMessageDialog(new JFrame(), "O ID DIGITADO NÃO EXISTE!", "Erro ao vender!", JOptionPane.ERROR_MESSAGE);
+                        AvisoID.setText("Insira um id válido!");
+                        IdProd.setText("");
+                    }
                 }
             }
             Tabela();

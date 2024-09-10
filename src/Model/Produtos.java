@@ -1,4 +1,4 @@
- package Model;
+package Model;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -490,8 +490,8 @@ public class Produtos extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    String nome, forn;
-    int id, qtd;
+    String nome, forn, nomebd;
+    int id, qtd, idbd;
     float preco;
     int notfound = 0;
 
@@ -539,13 +539,7 @@ public class Produtos extends javax.swing.JPanel {
             if (con != null) {
 
                 //MENSAGENS DE ERRO
-                if ("".equals(IdProd.getText()) || (IdProd.getText().length() <= 0)) {
-                    AvisoID.setText("Insira um id válido!");
-                    AvisoNome.setText("");
-                    AvisoQtd.setText("");
-                    AvisoPreco.setText("");
-
-                } else if ("".equals(NomeForn.getText()) || NomeForn.getText().length() <= 3) {
+                if ("".equals(NomeForn.getText()) || NomeForn.getText().length() <= 3) {
                     AvisoID.setText("");
                     AvisoNome.setText("Insira um nome válido!");
                     AvisoQtd.setText("");
@@ -556,36 +550,51 @@ public class Produtos extends javax.swing.JPanel {
                     AvisoNome.setText("");
                     AvisoQtd.setText("Insira uma quantidade válida!");
                     AvisoPreco.setText("");
- 
+
                 } else if ("".equals(PrecoProd.getText()) || PrecoProd.getText().length() <= 0) {
                     AvisoID.setText("");
                     AvisoNome.setText("");
                     AvisoQtd.setText("");
                     AvisoPreco.setText("Insira um preço válido!");
+                } else if ("".equals(NomeForn.getText()) || NomeForn.getText().length() <= 0) {
+                    AvisoID.setText("");
+                    AvisoNome.setText("");
+                    AvisoQtd.setText("");
+                    AvisoPreco.setText("Insira um fornecedor válido!");
                 } else {
-
-                    id = Integer.parseInt(IdProd.getText());
                     nome = NomeProd.getText();
                     forn = NomeForn.getText();
                     qtd = Integer.parseInt(QtdProd.getText());
                     
-                    preco = (int) Float.parseFloat(PrecoProd.getText());
+                    //CONSULTA DE FORNECEDOR
+                    PreparedStatement pst = con.prepareStatement("SELECT * FROM fornecedores WHERE nome ='" + forn + "'");
+                    ResultSet rs = pst.executeQuery();
+                    while (rs.next()) {
+                        nomebd = rs.getString("nome");
+                        idbd = rs.getInt("id");
+                        notfound = 1;
+                    }
+                    if (notfound == 0) {
+                        JOptionPane.showMessageDialog(new JFrame(), "ESTE FORNECEDOR NÃO EXISTE NO BANCO DE DADOS!", "Erro ao vender!", JOptionPane.ERROR_MESSAGE);
+                    } else {
 
-                    //CRIAÇÃO NO BANCO
-                    PreparedStatement pst1 = Produto.criar(nome, forn, qtd, preco);
-                    IdProd.setText("");
-                    NomeForn.setText("");
-                    QtdProd.setText("");
-                    NomeProd.setText("");
-                    PrecoProd.setText("");
-                    showMessageDialog(null, "Produto adicionado com sucesso!");
-                    AvisoID.setText("");
-                    AvisoNome.setText("");
-                    AvisoQtd.setText("");
-                    AvisoPreco.setText("");
+                        preco = (int) Float.parseFloat(PrecoProd.getText());
+
+                        //CRIAÇÃO NO BANCO
+                        PreparedStatement pst1 = Produto.criar(nome, forn, qtd, preco);
+                        IdProd.setText("");
+                        NomeForn.setText("");
+                        QtdProd.setText("");
+                        NomeProd.setText("");
+                        PrecoProd.setText("");
+                        showMessageDialog(null, "Produto adicionado com sucesso!");
+                        AvisoID.setText("");
+                        AvisoNome.setText("");
+                        AvisoQtd.setText("");
+                        AvisoPreco.setText("");
+                    }
+                    Tabela();
                 }
-                Tabela();
-
             }
         } catch (Exception e) {
             System.out.println("ERRO!" + e.getMessage());

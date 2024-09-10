@@ -14,7 +14,6 @@ public class Compras extends javax.swing.JPanel {
 
     Connection con = Conexao.getConnection();
     ResultSet rs = null;
-    Statement st = null;
     PreparedStatement ps = null;
     int qtd = 0, id = 0;
     float preco = 0, gasto = 0;
@@ -430,7 +429,7 @@ public class Compras extends javax.swing.JPanel {
     private void BuscarBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BuscarBtnActionPerformed
         try {
             if (con != null) {
-                st = con.createStatement();
+                Statement st = con.createStatement();
 
                 if (("").equals(BuscarID.getText())) {
                     JOptionPane.showMessageDialog(new JFrame(), "Necessário inserir o ID do produto!", "Erro ao buscar!", JOptionPane.ERROR_MESSAGE);
@@ -501,8 +500,8 @@ public class Compras extends javax.swing.JPanel {
                     if (pst1 == 1) {
                         float gasto = preco * qtd;
                         //INSERIR NO BANCO
-                        query = "UPDATE produtos SET quantidade = -(quantidade)'" + qtd + "' WHERE id =" + id;
-                        st = con.createStatement();
+                        query = "UPDATE produtos SET quantidade = quantidade +'" + qtd + "' WHERE id =" + id;
+                       Statement st = con.createStatement();
                         st.executeUpdate(query);
                         query = "INSERT INTO compras (idprod, quantidade, preco, gasto)" + "VALUES('" + id + "', '" + qtd + "', '" + preco + "', '" + gasto + "')";
                         st.executeUpdate(query);
